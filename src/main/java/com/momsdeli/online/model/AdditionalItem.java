@@ -27,6 +27,8 @@ public class AdditionalItem {
     @Column(name = "isSelected")
     private boolean isSelected;
 
+    private String imageURL;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
