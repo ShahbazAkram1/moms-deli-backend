@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,7 +79,10 @@ public class AdditionalItemServiceImpl implements AdditionalItemService {
     }
 
     @Override
-    public List<AdditionalItem> getAdditionByProductCategory(ProductCategory productCategory) {
-        return  this.additionalItemRepository.findAdditionalItemByCategory(this.productCategoryRepository.findById(productCategory.getId()).orElseThrow(() -> new RuntimeException("Category not found")));
-    }
+    public List<List<AdditionalItem>> getAdditionByProductCategory(List<ProductCategory> productCategory) {
+        List<List<AdditionalItem>> listOfAdditionItem = new ArrayList<>();
+        for(ProductCategory pr:productCategory){
+            listOfAdditionItem.add(this.additionalItemRepository.findAdditionalItemByCategory(this.productCategoryRepository.findById(pr.getId()).orElseThrow(() -> new RuntimeException("Category not found"))));
+        }
+        return  listOfAdditionItem;}
 }

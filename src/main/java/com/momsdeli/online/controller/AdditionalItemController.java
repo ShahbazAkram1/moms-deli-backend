@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/additional-items")
 public class AdditionalItemController {
-
+//    http://localhost:8081/api/additional-items/getByProductCategory
     private final AdditionalItemService additionalItemService;
 
     public AdditionalItemController(AdditionalItemService additionalItemService) {
@@ -70,8 +70,8 @@ public class AdditionalItemController {
     }
 
     @PostMapping("/getByProductCategory")
-    public ResponseEntity<List<AdditionalItem>> getAdditionItemsByProductCategory(@RequestBody ProductCategory productCategory){
-        List<AdditionalItem> additionByProductCategory = this.additionalItemService.getAdditionByProductCategory(productCategory);
+    public ResponseEntity<List<List<AdditionalItem>>> getAdditionItemsByProductCategory(@RequestBody List<ProductCategory>  productCategory){
+        List<List<AdditionalItem>> additionByProductCategory = this.additionalItemService.getAdditionByProductCategory(productCategory);
         return   ResponseEntity.ok(additionByProductCategory);
     }
 }
