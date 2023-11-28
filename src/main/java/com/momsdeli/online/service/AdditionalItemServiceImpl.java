@@ -79,10 +79,8 @@ public class AdditionalItemServiceImpl implements AdditionalItemService {
     }
 
     @Override
-    public List<List<AdditionalItem>> getAdditionByProductCategory(List<ProductCategory> productCategory) {
-        List<List<AdditionalItem>> listOfAdditionItem = new ArrayList<>();
-        for(ProductCategory pr:productCategory){
-            listOfAdditionItem.add(this.additionalItemRepository.findAdditionalItemByCategory(this.productCategoryRepository.findById(pr.getId()).orElseThrow(() -> new RuntimeException("Category not found"))));
-        }
-        return  listOfAdditionItem;}
+    public List<AdditionalItem> getAdditionByProductCategory(ProductCategory productCategory) {
+        return  this.additionalItemRepository.findAdditionalItemByCategory(this.productCategoryRepository.findById(productCategory.getId()).orElseThrow(() -> new RuntimeException("Category not found")));
+
+    }
 }

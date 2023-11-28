@@ -70,8 +70,8 @@ public class AdditionalItemController {
     }
 
     @PostMapping("/getByProductCategory")
-    public ResponseEntity<List<List<AdditionalItem>>> getAdditionItemsByProductCategory(@RequestBody List<ProductCategory>  productCategory){
-        List<List<AdditionalItem>> additionByProductCategory = this.additionalItemService.getAdditionByProductCategory(productCategory);
+    public ResponseEntity<List<AdditionalItem>> getAdditionItemsByProductCategory(@RequestBody ProductCategory productCategory){
+        List<AdditionalItem> additionByProductCategory = this.additionalItemService.getAdditionByProductCategory(productCategory);
         return   ResponseEntity.ok(additionByProductCategory);
     }
 }

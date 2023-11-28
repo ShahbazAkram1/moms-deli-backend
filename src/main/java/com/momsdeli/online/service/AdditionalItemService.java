@@ -15,5 +15,5 @@ public interface AdditionalItemService {
     AdditionalItem updateAdditionalItem(Long additionalItemId, AdditionalItem updatedAdditionalItem);
     boolean deleteAdditionalItem(Long additionalItemId);
 
-    List<List<AdditionalItem>> getAdditionByProductCategory(List<ProductCategory>  productCategory);
+  List<AdditionalItem> getAdditionByProductCategory(ProductCategory productCategory);
 }
