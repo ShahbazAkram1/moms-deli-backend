@@ -1,34 +1,26 @@
 package com.momsdeli.online.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
-//import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "product")
-@Data
-public class Product {
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+public class Product1 {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id", nullable = false)
-    @JsonBackReference
-    private Category category;
-
-
 
     @Column(name = "name")
     private String name;
@@ -49,6 +41,7 @@ public class Product {
     private int unitsInStock;
 
     @ManyToMany(mappedBy = "products")
+    @ToString.Exclude
     private Set<AdditionalItem> additionalItems;
 
     @Column(name = "discounted_price")
@@ -59,5 +52,21 @@ public class Product {
 
     private Integer quantity;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Rating> ratings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Review> reviews = new ArrayList<>();
+
+    @Column(name = "num_ratings")
+    private Integer numRatings;
+
+    @ManyToOne()
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    private LocalDateTime createdAt;
 
 }

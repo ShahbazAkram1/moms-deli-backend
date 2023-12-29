@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
+        }
+        .content {
+            padding: 20px;
+            text-align: left;
+        }
+        .footer {
+            background: #f4f4f4;
+            color: black;
+            padding: 10px;
+            text-align: center;
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
+        }
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .item img {
+            max-width: 100px;
+            height: auto;
+            float: left;
+            margin-right: 20px;
+        }
+        .item-details {
+            overflow: hidden;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 95%;
+                margin: 10px auto;
+                padding: 10px;
+            }
+            .header, .footer {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Mom's Deli Order Confirmation</h2>
+    </div>
+    <div class="content">
+        <p>Order Number: [OrderNumber]</p>
+        <p>Dear [CustomerName],</p>
+        <p>Thank you for your order! Here are your order details:</p>
+        <div class="item">
+            <img src="[ProductImage]" alt="Product">
+            <div class="item-details">
+                <p>[ProductName] - $[Price]</p>
+                <p>Quantity: [Quantity]</p>
+            </div>
+        </div>
+        <!-- Repeat above div for each product -->
+        <p class="total">Subtotal: $[Subtotal]</p>
+        <p class="total">Shipping: $[Shipping]</p>
+        <p class="total">Total: $[Total]</p>
+        <p>Shipping Address: [ShippingAddress]</p>
+        <p>Billing Address: [BillingAddress]</p>
+    </div>
+    <div class="footer">
+        <p>If you have any questions, contact us at <a href="mailto:support@momsdeli.com">support@momsdeli.com</a></p>
+        <p>&copy; <span id="currentYear"></span> Mom's Deli. All rights reserved.</p>
+    </div>
+</div>
+<script>
+    document.getElementById('currentYear').innerText = new Date().getFullYear();
+</script>
+</body>
+</html>

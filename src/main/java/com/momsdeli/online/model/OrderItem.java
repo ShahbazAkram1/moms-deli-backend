@@ -33,4 +33,8 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @Column(name="product_name")
+    private String productName;
+
+
 }
