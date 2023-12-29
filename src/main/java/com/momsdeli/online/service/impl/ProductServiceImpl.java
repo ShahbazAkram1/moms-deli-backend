@@ -113,15 +113,15 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    @Override
-    public List<Product> findProductByCategory(String category) throws ProductException {
-        try {
-            return productRepository.findByCategoryName(category);
-        } catch (Exception e) {
-            logger.error("Error finding products by category " + category, e);
-            throw new ProductException("Error finding products by category " + category + ": " + e.getMessage());
-        }
-    }
+//    @Override
+//    public List<Product> findProductByCategory(String category) throws ProductException {
+//        try {
+//            return productRepository.findByCategoryName(category);
+//        } catch (Exception e) {
+//            logger.error("Error finding products by category " + category, e);
+//            throw new ProductException("Error finding products by category " + category + ": " + e.getMessage());
+//        }
+//    }
 
     @Override
     public Page<Product> getAllProduct(String category, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize) throws ProductException {

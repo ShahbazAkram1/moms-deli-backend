@@ -49,7 +49,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.findByNameContaining(name, pageable));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<Page<Product>> getAllProducts(Pageable pageable) throws ProductException {
         return ResponseEntity.ok(productService.findAll(pageable));
     }
@@ -90,8 +90,9 @@ public class ProductController {
 
     @GetMapping("/category/name/{categoryName}")
     public ResponseEntity<List<Product>> getProductsByCategoryName(@PathVariable String categoryName) throws ProductException {
-        List<Product> products = productService.findProductByCategory(categoryName);
-        return ResponseEntity.ok(products);
+        //  List<Product> products = productService.findProductByCategory(categoryName);
+        // return ResponseEntity.ok(products);
+        return null;
     }
 
     @GetMapping("/filtered")

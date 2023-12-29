@@ -98,7 +98,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         String businessOwnerMessage = buildBusinessOwnerNotification(order);
         SMSRequest ownerRequest = new SMSRequest();
-        ownerRequest.setPhoneNumber("+923136664492"); // Replace with owner's phone number
+        ownerRequest.setPhoneNumber("+032172712636"); // Replace with owner's phone number
         ownerRequest.setMessage(businessOwnerMessage);
         smsService.sendSMS(ownerRequest);
         log.info("SMS sent successfully to business owner with order details");
@@ -133,7 +133,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setFrom("shahbazkhaniq@gmail.com");
+            helper.setFrom("momsdeli828@gmail.com");
             helper.setTo(emailAddress);
             helper.setSubject("Order Confirmation");
             helper.setText("Thank you for your order! Your order with tracking number "
@@ -152,7 +152,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setFrom("shahbazkhaniq@gmail.com");
+            helper.setFrom("momsdeli828@gmail.com");
             helper.setTo(emailAddress);
             helper.setSubject("Order Confirmation - #" + order.getOrderTrackingNumber());
 
