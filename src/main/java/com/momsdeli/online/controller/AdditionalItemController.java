@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = {"https://momsdelionline.com", "http://localhost:4200"})
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/additional-items")
 public class AdditionalItemController {
@@ -38,6 +38,7 @@ public class AdditionalItemController {
 
     @PostMapping
     public ResponseEntity<AdditionalItem> createAdditionalItem(@RequestBody AdditionalItem additionalItem) {
+        System.out.println(additionalItem);
         AdditionalItem createdAdditionalItem = additionalItemService.createAdditionalItem(additionalItem);
         if (createdAdditionalItem != null) {
             return new ResponseEntity<>(createdAdditionalItem, HttpStatus.CREATED);

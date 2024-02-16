@@ -9,6 +9,7 @@
 
 package com.momsdeli.online.exception;
 
+import com.momsdeli.online.dto.StatusDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,4 +31,32 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 "Failed to send SMS: " + ex.getMessage());
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<StatusDto> userNotFound(UserNotFoundException userNotFoundException) {
+        StatusDto statusDto = new StatusDto();
+        statusDto.setCode(404L);
+        statusDto.setMessage(userNotFoundException.getMessage());
+        return ResponseEntity.ok(statusDto);
+    }
+
+    @ExceptionHandler(InvalidCategoryNameException.class)
+    public ResponseEntity<String> handleInvalidCategoryNameException(InvalidCategoryNameException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<String> handleCategoryNotFoundException(CategoryNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    public ResponseEntity<String> handleProductNotFoundException(ProductNotFoundException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
 }

@@ -43,7 +43,7 @@ public class CheckoutControllerTest {
 
     @Test
     @DisplayName("Test placing an order - Successful Scenario")
-    public void testPlaceOrder() {
+    public void testPlaceOrder() throws StripeException {
 
         Purchase purchase = new Purchase();
         PurchaseResponse expectedResponse = new PurchaseResponse("CN128928388");
@@ -56,7 +56,7 @@ public class CheckoutControllerTest {
 
     @Test
     @DisplayName("Test placing an order - Failed Order Placement")
-    public void testPlaceOrderFailed() {
+    public void testPlaceOrderFailed() throws StripeException {
 
         Purchase purchase = new Purchase();
         when(checkoutService.placeOrder(purchase)).thenThrow(new RuntimeException("Failed to place order"));

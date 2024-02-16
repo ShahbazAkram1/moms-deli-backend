@@ -31,5 +31,5 @@ public class ProductOption {
 
     @ManyToOne
     @JoinColumn(name = "product_category", nullable = false)
-    private Category productCategory;
+    private ProductCategory productCategory;
 }

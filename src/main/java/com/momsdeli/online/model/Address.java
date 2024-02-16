@@ -1,18 +1,13 @@
 package com.momsdeli.online.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "address")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Address {
 
     //    @Id
@@ -44,12 +39,4 @@ public class Address {
     @OneToOne
     @PrimaryKeyJoinColumn
     private Order order;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
-    private User user;
-
-    @Column(name = "phone")
-    private String phone;
 }

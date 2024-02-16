@@ -1,8 +1,6 @@
 package com.momsdeli.online.service;
 
-import com.momsdeli.online.exception.ProductException;
 import com.momsdeli.online.model.Product;
-import com.momsdeli.online.request.ProductRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,24 +8,18 @@ import java.util.List;
 
 public interface ProductService {
 
-    Page<Product> findAll(Pageable pageable) throws ProductException;
 
-    Page<Product> findByCategoryId(long id, Pageable pageable) throws ProductException;
+    List<Product> findAllProducts();
 
-    Page<Product> findByNameContaining(String name, Pageable pageable) throws ProductException;
+    Product findProductById(Long id);
 
-    Product createProduct(ProductRequest productRequest) throws ProductException;
+    Product saveProduct(Product product);
 
-    String deleteProduct(Long productId) throws ProductException;
+    void deleteProduct(Long id);
 
-    Product updateProduct(Long productId, Product product) throws ProductException;
+    Product getProductById(Long productId);
 
-    Product findByProductId(Long id) throws ProductException;
-
-//    List<Product> findProductByCategory(String category) throws ProductException;
-
-    Page<Product> getAllProduct(String category, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort,
-                                String stock, Integer pageNumber, Integer pageSize) throws ProductException;
-
-
+    Page<Product> findAllProducts(Pageable pageable);
+    Page<Product> findAllProductsByCategory(Long categoryId,Pageable pageable);
+    Page<Product> findCategoryByName(String categoryName, Pageable pageable);
 }

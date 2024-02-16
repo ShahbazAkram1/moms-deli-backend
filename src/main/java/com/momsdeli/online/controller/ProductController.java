@@ -1,113 +1,138 @@
 /**
  * Author: Shahbaz Ali
  * Email: shahbazkhaniq@gmail.com
- * Date: 12/25/2023$
- * Time: 2:32 PM$
+ * Date: 1/3/2024$
+ * Time: 8:08 PM$
  * Project Name: moms_deli_backend$
  */
 
 
 package com.momsdeli.online.controller;
 
-import com.momsdeli.online.exception.ProductException;
+import com.momsdeli.online.exception.CategoryNotFoundException;
+import com.momsdeli.online.exception.ProductNotFoundException;
+import com.momsdeli.online.model.ProductCategory;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import com.momsdeli.online.model.Product;
-import com.momsdeli.online.request.ProductRequest;
 import com.momsdeli.online.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = {"https://momsdelionline.com", "http://localhost:4200"})
+@CrossOrigin("*")
+@Slf4j
 public class ProductController {
-
 
     private final ProductService productService;
 
-    @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
-    @GetMapping()
-    public ResponseEntity<Page<Product>> listProduct(Pageable pageable) throws ProductException {
-        return ResponseEntity.ok(productService.findAll(pageable));
+//    @GetMapping
+//    public List<Product> getAllProducts() {
+//        return productService.findAllProducts();
+//    }
+//
+
+    @GetMapping("/")
+    public Page<Product> getAllProducts(@RequestParam(required = false) int page,
+                                        @RequestParam(required = false) int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return productService.findAllProducts(pageRequest);
     }
 
-    @GetMapping("/search/findByCategoryId")
-    public ResponseEntity<Page<Product>> findByCategoryId(@RequestParam("id") long id, Pageable pageable) throws ProductException {
-        return ResponseEntity.ok(productService.findByCategoryId(id, pageable));
+    @GetMapping("/category")
+    public ResponseEntity<Page<Product>> getAllProductsByCategory(@RequestParam("categoryId") Long categoryId,
+                                                                  @RequestParam(required = false) int page,
+                                                                  @RequestParam(required = false) int size) {
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            Page<Product> products = productService.findAllProductsByCategory(categoryId, pageRequest);
+            if (products.isEmpty()) {
+                throw new ProductNotFoundException("No products found for category with ID: " + categoryId);
+            }
+            log.info("Products retrieved for category with ID {}:", categoryId);
+            return ResponseEntity.ok(products);
+        } catch (ProductNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Page.empty());
+        } catch (Exception e) {
+            log.error("Error in getAllProductsByCategory", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Page.empty());
+        }
     }
 
-    @GetMapping("/search/findByNameContaining")
-    public ResponseEntity<Page<Product>> findByNameContaining(@RequestParam("name") String name, Pageable pageable) throws ProductException {
-        return ResponseEntity.ok(productService.findByNameContaining(name, pageable));
+    @GetMapping("/categoryByName")
+    public ResponseEntity<Page<Product>> getAllProductsByCategoryName(@RequestParam("categoryName") String categoryName,
+                                                                      @RequestParam(required = false) int page,
+                                                                      @RequestParam(required = false) int size) {
+        try {
+            if (StringUtils.isBlank(categoryName)) {
+                throw new IllegalArgumentException("Category name cannot be null or empty");
+            }
+
+            PageRequest pageRequest = PageRequest.of(page, size);
+            ProductCategory category = (ProductCategory) productService.findCategoryByName(categoryName, pageRequest);
+            if (category == null) {
+                throw new CategoryNotFoundException("Category not found");
+            }
+
+            Page<Product> products = productService.findAllProductsByCategory(category.getId(), pageRequest);
+            if (products.isEmpty()) {
+                throw new ProductNotFoundException("No products found for category with name: " + categoryName);
+            }
+
+            return ResponseEntity.ok(products);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Page.empty());
+        } catch (CategoryNotFoundException | ProductNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Page.empty());
+        } catch (Exception e) {
+            log.error("Error in getAllProductsByCategory", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Page.empty());
+        }
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Page<Product>> getAllProducts(Pageable pageable) throws ProductException {
-        return ResponseEntity.ok(productService.findAll(pageable));
-    }
-
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<Page<Product>> getProductsByCategory(@PathVariable long categoryId, Pageable pageable) throws ProductException {
-        return ResponseEntity.ok(productService.findByCategoryId(categoryId, pageable));
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<Page<Product>> searchProductsByName(@RequestParam String name, Pageable pageable) throws ProductException {
-        return ResponseEntity.ok(productService.findByNameContaining(name, pageable));
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.findProductById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody ProductRequest productRequest) throws ProductException {
-        Product createdProduct = productService.createProduct(productRequest);
-        return ResponseEntity.ok(createdProduct);
+    public Product createProduct(@RequestBody Product product) {
+        System.out.println(product.getCategory().getId());
+        return productService.saveProduct(product);
     }
 
-    @DeleteMapping("/{productId}")
-    public ResponseEntity<String> deleteProduct(@PathVariable Long productId) throws ProductException {
-        String response = productService.deleteProduct(productId);
-        return ResponseEntity.ok(response);
-    }
+    @PutMapping("/")
+    public ResponseEntity<Product> updateProduct(@RequestBody Product productDetails) {
+        Product product = productService.findProductById(productDetails.getId());
 
-    @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @RequestBody Product productDetails) throws ProductException {
-        Product updatedProduct = productService.updateProduct(productId, productDetails);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+        product.setName(productDetails.getName());
+        product.setDescription(productDetails.getDescription());
+        product.setPrice(productDetails.getPrice());
+        product.setImageUrl(productDetails.getImageUrl());
+        product.setActive(productDetails.isActive());
+        product.setUnitsInStock(productDetails.getUnitsInStock());
+        product.setCategory(productDetails.getCategory());
+        product.setAdditionalItems(productDetails.getAdditionalItems());
+
+        Product updatedProduct = productService.saveProduct(product);
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long productId) throws ProductException {
-        Product product = productService.findByProductId(productId);
-        return ResponseEntity.ok(product);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/category/name/{categoryName}")
-    public ResponseEntity<List<Product>> getProductsByCategoryName(@PathVariable String categoryName) throws ProductException {
-        //  List<Product> products = productService.findProductByCategory(categoryName);
-        // return ResponseEntity.ok(products);
-        return null;
-    }
-
-    @GetMapping("/filtered")
-    public ResponseEntity<Page<Product>> getFilteredProducts(
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) Integer minPrice,
-            @RequestParam(required = false) Integer maxPrice,
-            @RequestParam(required = false) Integer minDiscount,
-            @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String stock,
-            Pageable pageable) throws ProductException {
-        Page<Product> products = productService.getAllProduct(category, minPrice, maxPrice, minDiscount, sort, stock, pageable.getPageNumber(), pageable.getPageSize());
-        return ResponseEntity.ok(products);
-    }
 }
-
-
-

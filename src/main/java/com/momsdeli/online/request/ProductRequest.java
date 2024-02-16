@@ -11,6 +11,8 @@ package com.momsdeli.online.request;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -18,12 +20,15 @@ import lombok.*;
 @ToString
 public class ProductRequest {
 
-    private String title;
-    private String description;
-    private Integer discountedPrice;
-    private Integer discountedPresent;
-    private Integer quantity;
-    private String imageUrl;
 
+    private Long categoryId; // To link product with a category
+    private String name;
+    private String description;
+    private BigDecimal price; // Using BigDecimal for monetary values
+    private String imageUrl;
+    private boolean active;
+    private int unitsInStock;
+    private BigDecimal discountedPrice; // Assuming you want to accept a discounted price
+    private Integer discountedPercent; // Assuming this is a percentage of discount
 
 }

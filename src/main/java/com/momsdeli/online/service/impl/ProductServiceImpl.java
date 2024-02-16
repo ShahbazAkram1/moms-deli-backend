@@ -1,136 +1,102 @@
 package com.momsdeli.online.service.impl;
 
-import com.momsdeli.online.exception.ProductException;
+import com.momsdeli.online.exception.CategoryNotFoundException;
+import com.momsdeli.online.exception.InvalidCategoryNameException;
 import com.momsdeli.online.model.Product;
-import com.momsdeli.online.repository.CategoryRepository;
+import com.momsdeli.online.model.ProductCategory;
 import com.momsdeli.online.repository.ProductRepository;
-import com.momsdeli.online.request.ProductRequest;
+import com.momsdeli.online.service.CategoryService;
 import com.momsdeli.online.service.ProductService;
-import com.momsdeli.online.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
+@Slf4j
 public class ProductServiceImpl implements ProductService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     private final ProductRepository productRepository;
-    private final UserService userService;
-    private final CategoryRepository categoryRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository, UserService userService, CategoryRepository categoryRepository) {
+    private final CategoryService categoryService;
+
+    public ProductServiceImpl(ProductRepository productRepository, CategoryService categoryService) {
         this.productRepository = productRepository;
-        this.userService = userService;
-        this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
     }
 
     @Override
-    public Page<Product> findAll(Pageable pageable) throws ProductException {
-        try {
-            return productRepository.findAll(pageable);
-        } catch (Exception e) {
-            logger.error("Error finding all products: ", e);
-            throw new ProductException("Error finding all products: " + e.getMessage());
-        }
+    @Transactional
+    public List<Product> findAllProducts() {
+        log.info("Fetching all products");
+        List<Product> products = productRepository.findAll();
+        Collections.shuffle(products);
+        return products;
     }
 
     @Override
-    public Page<Product> findByCategoryId(long id, Pageable pageable) throws ProductException {
-        try {
-            return productRepository.findByCategoryId(id, pageable);
-        } catch (Exception e) {
-            logger.error("Error finding products by category ID " + id, e);
-            throw new ProductException("Error finding products by category ID " + id + ": " + e.getMessage());
-        }
+    @Transactional
+    public Product findProductById(Long id) {
+        log.info("Fetching product with id: {}", id);
+        return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     @Override
-    public Page<Product> findByNameContaining(String name, Pageable pageable) throws ProductException {
-        try {
-            return productRepository.findByNameContaining(name, pageable);
-        } catch (Exception e) {
-            logger.error("Error finding products containing name " + name, e);
-            throw new ProductException("Error finding products containing name " + name + ": " + e.getMessage());
-        }
-    }
-
-    @Override
-    public Product createProduct(ProductRequest productRequest) throws ProductException {
-        try {
-            Product product = new Product();
-            product.setDescription(productRequest.getDescription());
+    @Transactional
+    public Product saveProduct(Product product) {
+        log.info("Saving product: {}", product);
+        System.out.println(product);
+        ProductCategory category = this.categoryService.findById(product.getCategory().getId());
+//        ProductCategory category = this.categoryRepository.findById(product.getCategory().getId()).orElseThrow(() -> new RuntimeException("Category Not Found"));
+        if (category != null) {
+            product.setCategory(category);
             return productRepository.save(product);
-        } catch (Exception e) {
-            logger.error("Error creating product: ", e);
-            throw new ProductException("Error creating product: " + e.getMessage());
+        } else {
+            return null;
         }
     }
 
     @Override
-    public String deleteProduct(Long productId) throws ProductException {
-        try {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new ProductException("Product not found"));
-            productRepository.delete(product);
-            return "Product deleted successfully";
-        } catch (Exception e) {
-            logger.error("Error deleting product with ID " + productId, e);
-            throw new ProductException("Error deleting product: " + e.getMessage());
-        }
+    public void deleteProduct(Long id) {
+        log.info("Deleting product with id: {}", id);
+        this.productRepository.findById(id).ifPresent(productRepository::delete);
     }
 
     @Override
-    public Product updateProduct(Long productId, Product productDetails) throws ProductException {
-        try {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new ProductException("Product not found"));
-            product.setName(productDetails.getName());
-            product.setDescription(productDetails.getDescription());
-            product.setPrice(productDetails.getPrice());
-            // Update other fields
-            return productRepository.save(product);
-        } catch (Exception e) {
-            logger.error("Error updating product with ID " + productId, e);
-            throw new ProductException("Error updating product: " + e.getMessage());
-        }
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId).orElse(null);
     }
 
     @Override
-    public Product findByProductId(Long id) throws ProductException {
-        try {
-            return productRepository.findById(id)
-                    .orElseThrow(() -> new ProductException("Product with ID " + id + " not found"));
-        } catch (Exception e) {
-            logger.error("Error finding product with ID " + id, e);
-            throw new ProductException("Error finding product: " + e.getMessage());
-        }
+    public Page<Product> findAllProducts(Pageable pageable) {
+        return this.productRepository.findAll(pageable);
     }
 
-//    @Override
-//    public List<Product> findProductByCategory(String category) throws ProductException {
-//        try {
-//            return productRepository.findByCategoryName(category);
-//        } catch (Exception e) {
-//            logger.error("Error finding products by category " + category, e);
-//            throw new ProductException("Error finding products by category " + category + ": " + e.getMessage());
-//        }
-//    }
+    @Override
+    public Page<Product> findAllProductsByCategory(Long categoryId, Pageable pageable) {
+        return this.productRepository.findByCategoryId(categoryId, pageable);
+    }
 
     @Override
-    public Page<Product> getAllProduct(String category, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize) throws ProductException {
-        try {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            return productRepository.findAll(pageable); // Modify this according to the specific criteria
-        } catch (Exception e) {
-            logger.error("Error getting all products", e);
-            throw new ProductException("Error getting all products: " + e.getMessage());
+    public Page<Product> findCategoryByName(String categoryName, Pageable pageable) {
+
+        if (StringUtils.isBlank(categoryName)) {
+            throw new InvalidCategoryNameException("Category name cannot be null or empty");
         }
+        // find category by name
+        ProductCategory category = (ProductCategory) categoryService.findByName(categoryName);
+
+        if (StringUtils.isBlank(categoryName)){
+
+            throw  new CategoryNotFoundException("Category not found ");
+        }
+
+        return productRepository.findByCategoryName(category.getName(), pageable);
     }
 }

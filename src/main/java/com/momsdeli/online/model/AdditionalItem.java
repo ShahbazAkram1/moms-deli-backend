@@ -1,10 +1,10 @@
 package com.momsdeli.online.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 
 import jakarta.persistence.*;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -12,6 +12,7 @@ import java.util.Set;
 @Entity
 @Table(name = "additional_item")
 @Data
+@ToString
 public class AdditionalItem {
 
     @Id
@@ -26,11 +27,11 @@ public class AdditionalItem {
     private BigDecimal price;
 
     @Column(name = "isSelected")
-    private boolean isSelected;
+    private boolean selected;
 
     private String imageURL;
-
-    @JsonIgnore
+//
+//    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private ProductCategory category;
@@ -44,7 +45,4 @@ public class AdditionalItem {
     )
     private Set<Product> products;
 
-    // Other properties...
-
-    // Constructors, getters, and setters...
 }

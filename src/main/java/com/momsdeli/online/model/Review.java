@@ -1,42 +1,44 @@
 /**
  * Author: Shahbaz Ali
  * Email: shahbazkhaniq@gmail.com
- * Date: 12/28/2023$
- * Time: 2:00 PM$
+ * Date: 1/16/2024$
+ * Time: 4:16 PM$
  * Project Name: moms_deli_backend$
  */
 
 
 package com.momsdeli.online.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Review {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String review;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    @JsonIgnore
-    private Product product;
-
+    private Integer rating;
+    private String comment;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+    private LocalDateTime timestamp;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    private LocalDateTime createdAt;
 
 }

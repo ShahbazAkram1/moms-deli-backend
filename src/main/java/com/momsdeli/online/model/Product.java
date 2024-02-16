@@ -1,9 +1,10 @@
 package com.momsdeli.online.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,21 +15,20 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "product")
+@Table(name="product")
 @Data
+@ToString
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties("products")
     private ProductCategory category;
-
-
 
     @Column(name = "name")
     private String name;
@@ -50,14 +50,6 @@ public class Product {
 
     @ManyToMany(mappedBy = "products")
     private Set<AdditionalItem> additionalItems;
-
-    @Column(name = "discounted_price")
-    private Integer discountedPrice;
-
-    @Column(name = "discounted_present")
-    private Integer discountedPresent;
-
-    private Integer quantity;
 
 
 }
