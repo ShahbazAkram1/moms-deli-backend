@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .order-details {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .order-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .total-price {
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #888;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0056b3;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #004080;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        <img src="logo.png" alt="Mom's Deli Logo" width="150">
+    </div>
+    <h1 style="color: #0056b3; font-size: 36px; font-weight: bold;">Order Confirmation</h1>
+    <p>Dear <strong>[Customer Name]</strong>,</p>
+    <p style="font-style: italic; font-size: 20px;">Thank you for your order! Your order with tracking number <strong>[Order
+        Tracking Number]</strong> has been
+        placed successfully.</p>
+    <div class="order-details">
+        <h2 style="color: #0056b3; font-size: 28px; font-weight: bold;">Order Details:</h2>
+        <ul>
+            <th:block th:each="item : ${order.items}">
+                <li class="order-item">
+                    <strong>Product:</strong> <span th:text="${item.productName}"></span><br/>
+                    <strong>Quantity:</strong> <span th:text="${item.quantity}"></span><br/>
+                    <strong>Product Price:</strong> <span th:text="${item.price}"></span><br/>
+                </li>
+            </th:block>
+        </ul>
+        <p class="total-price">Total Price: $[Total Price] USD</p>
+    </div>
+    <p style="margin-top: 30px; color: #666; font-size: 18px;">For any inquiries or assistance, please contact us at <a
+            href="mailto:shahbazkhaniq@gmail.com" style="color: #0056b3; text-decoration: none;">momsdeli828@gmail.com</a>.
+    </p>
+    <p class="footer">Best Regards,<br>Your Mom's Deli Team</p>
+</div>
+</body>
+</html>

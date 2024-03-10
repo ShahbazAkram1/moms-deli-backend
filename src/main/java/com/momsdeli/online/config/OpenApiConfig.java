@@ -20,8 +20,8 @@ import io.swagger.v3.oas.annotations.info.License;
                 description = "RESTful API documentation for Mom's Deli E-Commerce Platform. This API provides endpoints for managing products, reviews, and user-related operations.",
                 version = "v1",
                 contact = @Contact(
-                        name = "Max Dell-Thibodeau",
-                        email = "momsdeli828@gmail.com"
+                        name = "Shahbaz Ali",
+                        email = "shahbazkhaniq@gmail.com"
                 ),
                 license = @License(
                         name = "Apache 2.0",

@@ -44,10 +44,14 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/login", "/auth/register").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/customer/**").hasRole("CUSTOMER")
-                        .anyRequest().authenticated()
+//                        .requestMatchers("/auth/login", "/auth/register").permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/customer/**").hasRole("CUSTOMER")
+//                        .anyRequest().authenticated()
+                                .requestMatchers("/auth/*").permitAll()
+                                .requestMatchers("/customer/*").hasRole("CUSTOMER")
+                                .requestMatchers("/admin/*").hasRole("ADMIN")
+                                .anyRequest().anonymous()
                 )
                 .logout(LogoutConfigurer::permitAll);
 

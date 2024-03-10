@@ -13,6 +13,7 @@ import com.momsdeli.online.exception.CategoryNotFoundException;
 import com.momsdeli.online.exception.ProductNotFoundException;
 import com.momsdeli.online.model.ProductCategory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import com.momsdeli.online.model.Product;
 import com.momsdeli.online.service.ProductService;
@@ -21,6 +22,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.Min;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -34,16 +39,19 @@ public class ProductController {
         this.productService = productService;
     }
 
-//    @GetMapping
-//    public List<Product> getAllProducts() {
-//        return productService.findAllProducts();
-//    }
-//
+    @GetMapping
+    public List<Product> getAllProducts() {
+        return productService.findAllProducts();
+    }
 
     @GetMapping("/")
-    public Page<Product> getAllProducts(@RequestParam(required = false) int page,
-                                        @RequestParam(required = false) int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
+    public Page<Product> getAllProducts(@RequestParam(required = false) Integer page,
+                                        @RequestParam(required = false) Integer size) {
+        // Check if page and size are null, and provide defaults if necessary
+        int pageNumber = page != null ? page : 0;
+        int pageSize = size != null ? size : 10; // Provide a default size, e.g., 10
+
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
         return productService.findAllProducts(pageRequest);
     }
 
@@ -134,5 +142,22 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchProductsByName(String keyword, int page, int size) {
+        if (StringUtils.isBlank(keyword)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Page<Product> products = productService.searchProductsByName(keyword, page, size);
+        if (products.isEmpty()) {
+            String message = "No products found for keyword: " + keyword;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("message", message));
+        }
+
+        return ResponseEntity.ok(products);
+    }
+
 
 }

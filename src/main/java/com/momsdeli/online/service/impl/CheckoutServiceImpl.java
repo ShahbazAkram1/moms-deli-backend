@@ -5,17 +5,20 @@ import com.momsdeli.online.model.*;
 import com.momsdeli.online.repository.ProductRepository;
 import com.momsdeli.online.repository.CustomerRepository;
 import com.momsdeli.online.service.CheckoutService;
+import com.momsdeli.online.service.EmailService;
 import com.momsdeli.online.service.SMSService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -27,16 +30,19 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final ProductRepository productRepository;
     private final JavaMailSender emailSender;
     private final SMSService smsService;
+
+    private final EmailService emailService;
     private static int orderCounter = 1;
 
     public CheckoutServiceImpl(CustomerRepository customerRepository,
                                ProductRepository productRepository,
                                JavaMailSender emailSender,
-                               SMSService smsService) {
+                               SMSService smsService, EmailService emailService) {
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
         this.emailSender = emailSender;
         this.smsService = smsService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -77,56 +83,28 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     }
 
-
-    private void sendOrderConfirmationEmail(String emailAddress, String orderTrackingNumber, Order order) {
+    public void sendOrderConfirmationEmail(String emailAddress, String orderTrackingNumber, Order order) {
         try {
+            String emailTemplate = emailService.loadEmailTemplate();
+            String emailContent = populateEmailTemplate(emailTemplate, order.getCustomer().getFirstName(), orderTrackingNumber, generateOrderItemsList(order), order.getTotalPrice());
+
+            // Create MimeMessage and set content
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
             helper.setFrom("momsdeli828@gmail.com");
             helper.setTo(emailAddress);
             helper.setSubject("Order Confirmation");
+            helper.setText(emailContent, true);
 
-            StringBuilder emailContent = new StringBuilder("Thank you for your order! Your order with tracking number " + orderTrackingNumber + " has been placed successfully.\n\n");
-            emailContent.append("Order Details:\n");
-            for (OrderItem item : order.getOrderItems()) {
-                //Product product = item.getProduct();
-                Product product = productRepository.findById(item.getProductId()).orElse(null);
-                assert product != null;
-                BigDecimal productPrice = product.getPrice(); // Fetching price from Product
-                String priceString = (productPrice != null) ? productPrice.toString() : "N/A";
-
-                emailContent.append("Product: ")
-                        .append(product.getName())
-                        .append(", Quantity: ")
-                        .append(item.getQuantity())
-                        .append(", Price: ")
-                        .append(priceString)
-                        .append("\n");
-
-                // Check and append additional items
-                Set<AdditionalItem> additionalItems = product.getAdditionalItems(); // Assuming getAdditionalItems() method exists
-                if (additionalItems != null && !additionalItems.isEmpty()) {
-                    emailContent.append("Additional Items: ");
-                    for (AdditionalItem additionalItem : additionalItems) {
-                        emailContent.append(additionalItem.getName())
-                                .append(", ");
-                    }
-                    // Remove the last comma and space
-                    emailContent.setLength(emailContent.length() - 2);
-                    emailContent.append("\n");
-                }
-            }
-            emailContent.append("Total Price: ").append(order.getTotalPrice().toString());
-
-            helper.setText(emailContent.toString(), false); // false for plain text email
+            // Send email
             emailSender.send(message);
+
+            log.info("Order confirmation email sent successfully to: {}", emailAddress);
         } catch (Exception e) {
+            // Log the exception
             log.error("Failed to send order confirmation email to: " + emailAddress, e);
         }
     }
-
-
     private String formatSMSMessage(Order order) {
         StringBuilder smsMessage = new StringBuilder("Receipt:\n");
         smsMessage.append("Order #: ").append(order.getOrderTrackingNumber()).append("\n");
@@ -166,12 +144,18 @@ public class CheckoutServiceImpl implements CheckoutService {
         smsMessage.append("Phone Number: ").append(order.getCustomer().getPhoneNumber()).append("\n");
         smsMessage.append("Products:\n");
 
+        Set<AdditionalItem> additionalItems = new HashSet<>();
         for (OrderItem item : order.getOrderItems()) {
             Product product = productRepository.findById(item.getProductId()).orElse(null);
             if (product != null) {
-                log.info("Product: " + product.getName());
+                additionalItems.addAll(product.getAdditionalItems());
+            }
+        }
 
-                BigDecimal productPrice = product.getPrice(); // Fetching price from Product
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = productRepository.findById(item.getProductId()).orElse(null);
+            if (product != null) {
+                BigDecimal productPrice = product.getPrice();
                 String priceString = (productPrice != null) ? productPrice.toString() : "N/A";
 
                 smsMessage.append("Product: ")
@@ -182,18 +166,15 @@ public class CheckoutServiceImpl implements CheckoutService {
                         .append(priceString);
 
                 // Append selected additional items
-                Set<AdditionalItem> additionalItems = product.getAdditionalItems();
-                if (additionalItems != null && !additionalItems.isEmpty()) {
+                if (!additionalItems.isEmpty()) {
                     StringBuilder additionalItemsStr = new StringBuilder();
-                    log.info("Additional Items: " + product.getAdditionalItems());
                     for (AdditionalItem additionalItem : additionalItems) {
-                        if (additionalItem.isSelected()) { // Check if the additional item is selected
+                        if (additionalItem.isSelected()) {
                             additionalItemsStr.append(additionalItem.getName()).append(", ");
                         }
                     }
-                    // Append and format the additional items string
                     if (additionalItemsStr.length() > 0) {
-                        additionalItemsStr.setLength(additionalItemsStr.length() - 2); // Remove the last comma and space
+                        additionalItemsStr.setLength(additionalItemsStr.length() - 2);
                         smsMessage.append(", Additional Items: ").append(additionalItemsStr);
                     }
                 }
@@ -201,11 +182,10 @@ public class CheckoutServiceImpl implements CheckoutService {
             }
         }
 
-        log.info("sms sent response {} :", smsMessage);
-
         smsMessage.append("Total Price: ").append(order.getTotalPrice().toString());
         return smsMessage.toString();
     }
+
 
 
     @Override
@@ -223,4 +203,34 @@ public class CheckoutServiceImpl implements CheckoutService {
         // Create a PaymentIntent with the specified parameters
         return PaymentIntent.create(params);
     }
+
+    private String populateEmailTemplate(String template, String customerName, String orderTrackingNumber, String orderItems, BigDecimal totalPrice) {
+        // Populate template with actual values
+        return template.replace("[Customer Name]", customerName)
+                .replace("[Order Tracking Number]", orderTrackingNumber)
+                .replace("[Order Items]", orderItems)
+                .replace("[Total Price]", totalPrice.toString());
+    }
+
+    private String generateOrderItemsList(Order order) {
+        StringBuilder orderItemsList = new StringBuilder();
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = productRepository.findById(item.getProductId()).orElse(null);
+            if (product != null) {
+                BigDecimal productPrice = product.getPrice();
+                String priceString = (productPrice != null) ? productPrice.toString() : "N/A";
+
+                // Format each order item on a new line
+                orderItemsList.append("Product: ")
+                        .append(product.getName())
+                        .append(", Quantity: ")
+                        .append(item.getQuantity())
+                        .append(", Product Price: ")
+                        .append(priceString)
+                        .append("\n");
+            }
+        }
+        return orderItemsList.toString();
+    }
+
 }

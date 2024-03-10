@@ -45,4 +45,8 @@ public class AdditionalItem {
     )
     private Set<Product> products;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
 }

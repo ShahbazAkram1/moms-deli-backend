@@ -17,11 +17,15 @@ import com.momsdeli.online.repository.UserRepository;
 import com.momsdeli.online.request.LoginRequest;
 import com.momsdeli.online.service.UserService;
 import com.momsdeli.online.utils.JwtHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     @Autowired
@@ -53,8 +57,15 @@ public class UserServiceImpl implements UserService {
 //    }
 
     @Override
-    public User findUserById(Long userId) throws UserException {
-        return null;
+    public User findUserById(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            return optionalUser.get();
+        } else {
+            String errorMessage = String.format("User with ID %d not found", userId);
+            log.error(errorMessage);
+            throw new UserNotFoundException(errorMessage);
+        }
     }
 
     @Override

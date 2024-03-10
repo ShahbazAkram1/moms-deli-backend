@@ -1,6 +1,7 @@
 package com.momsdeli.online.controller;
 
 import com.momsdeli.online.dto.StatusDto;
+import com.momsdeli.online.exception.UserException;
 import com.momsdeli.online.model.Role;
 import com.momsdeli.online.model.RoleName;
 import com.momsdeli.online.model.User;
@@ -60,4 +61,16 @@ public class UserController {
 
         return  ResponseEntity.status(HttpStatus.OK).body(this.userService.createUser(user));
     }
+
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<User> getUserById(@PathVariable Long userId) throws UserException {
+        User user = userService.findUserById(userId);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

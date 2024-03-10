@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface ProductService {
 
-
     List<Product> findAllProducts();
 
     Product findProductById(Long id);
@@ -20,6 +19,10 @@ public interface ProductService {
     Product getProductById(Long productId);
 
     Page<Product> findAllProducts(Pageable pageable);
-    Page<Product> findAllProductsByCategory(Long categoryId,Pageable pageable);
+
+    Page<Product> findAllProductsByCategory(Long categoryId, Pageable pageable);
+
     Page<Product> findCategoryByName(String categoryName, Pageable pageable);
+
+    Page<Product> searchProductsByName(String keyword, int page, int size);
 }

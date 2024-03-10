@@ -5,6 +5,8 @@ import lombok.Setter;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="order_item")
@@ -38,4 +40,11 @@ public class OrderItem {
     private Product product;
 
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "order_item_additional_item",
+            joinColumns = @JoinColumn(name = "order_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "additional_item_id")
+    )
+    private Set<AdditionalItem> selectedAdditionalItems = new HashSet<>();
 }

@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -92,11 +93,25 @@ public class ProductServiceImpl implements ProductService {
         // find category by name
         ProductCategory category = (ProductCategory) categoryService.findByName(categoryName);
 
-        if (StringUtils.isBlank(categoryName)){
+        if (StringUtils.isBlank(categoryName)) {
 
-            throw  new CategoryNotFoundException("Category not found ");
+            throw new CategoryNotFoundException("Category not found ");
         }
 
         return productRepository.findByCategoryName(category.getName(), pageable);
     }
+
+    @Override
+    public Page<Product> searchProductsByName(String keyword, int page, int size) {
+        if (StringUtils.isBlank(keyword)) {
+            throw new IllegalArgumentException("Keyword cannot be null or empty");
+        }
+        log.info("Searching products by name containing '{}'", keyword);
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Product> searchResults = productRepository.findByNameContainingIgnoreCase(keyword, pageRequest);
+        log.info("Found {} products matching the search criteria", searchResults.getTotalElements());
+        return searchResults;
+    }
+
+
 }
