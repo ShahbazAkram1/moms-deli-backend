@@ -22,11 +22,7 @@ import java.util.HashSet;
 public class UserController {
 
     private final UserService userService;
-
-
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-
     private final RoleRepository roleRepository;
 
     public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, RoleRepository roleRepository) {

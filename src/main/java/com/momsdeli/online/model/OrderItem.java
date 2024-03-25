@@ -47,4 +47,6 @@ public class OrderItem {
             inverseJoinColumns = @JoinColumn(name = "additional_item_id")
     )
     private Set<AdditionalItem> selectedAdditionalItems = new HashSet<>();
+//    private Set<BreadOption> selectedBread = new HashSet<>();
+//    hitte poye bread jo b ando  rakho na po ada
 }
